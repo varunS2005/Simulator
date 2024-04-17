@@ -1,0 +1,154 @@
+register_encoding = {
+    "00001": "ra",
+    "00010": "sp",
+    "00011": "gp",
+    "00100": "tp",
+    "00101": "t0",
+    "00110": "t1",
+    "00111": "t2",
+    "01000": "s0",
+    "01001": "s1",
+    "01010": "a0",
+    "01011": "a1",
+    "01100": "a2",
+    "01101": "a3",
+    "01110": "a4",
+    "01111": "a5",
+    "10000": "a6",
+    "10001": "a7",
+    "10010": "s2",
+    "10011": "s3",
+    "10100": "s4",
+    "10101": "s5",
+    "10110": "s6",
+    "10111": "s7",
+    "11000": "s8",
+    "11001": "s9",
+    "11010": "s10",
+    "11011": "s11",
+    "11100": "t3",
+    "11101": "t4",
+    "11110": "t5",
+    "11111": "t6",
+    "00000": "x0"
+}
+
+register_values={"ra":"","sp":"","gp":"","tp":"","t0":"","t1":"","t2":"","s0"
+:"","s1":"","a0":"","a1":"", "a2": "", "a3":"","a4":"","a5":"","a6":"", "a7":"","s2":"00000110",
+  "s3":"11001101","s4":"","s5":"","s6":"","s7":"","s8":"","s9":"","s10":"",
+    "s11" :"", "t3":"", "t4":"","t5":"","t6":"", "x0":"","sp":""}
+inputstr=str(input())
+inst={"add":"r","sub":"r", "slt":"r", "sltu":"r", "xor":"r", "or":"r", "sll":"r", "srl":"r", "or":"r", "and":"r", "lw":"i", "addi":"i",
+      "sltu":"i", "jalr":"i", "sw":"s", "beq":"b" , "bne":"b", "bge":"b","bgeu":"b", "blt":"b", "bltu":"b", "auipc":"u", "lui":"u", "jal":"j"}
+def signed(num):
+    binary=str()
+    temp=[]
+    if num>0:
+        binary = bin(abs(num))[2:].zfill(8)
+    else:
+        binary = bin(abs(num+2*abs(num)))[2:].zfill(8)
+        temp.append(1)
+        for i in range(1,len(binary)):
+            temp.append(binary[i])
+        binary=""
+        for i in range(len(temp)):
+            binary=binary+str(temp[i])
+    return binary
+
+def bintodecs(binary_str):
+    if binary_str[0] == '1':
+        binary_str = ''.join('1' if bit == '0' else '0' for bit in binary_str)
+        binary_str = bin(int(binary_str, 2) + 1)[2:]
+        decimal = -int(binary_str, 2)
+    else:
+        decimal = int(binary_str, 2)
+    return decimal
+def two_compliment(num):
+    binary=str()
+    temp=[]
+    temp2=[]
+    binary=bin(abs(num))[2:].zfill(8)
+    for i in range(len(binary)):
+            temp.append(binary[i])
+    for i in (temp):
+        if i=="0":
+            temp2.append(1)
+        else:
+            temp2.append(0)
+    carry = 1
+    for i in range(len(temp) - 1, -1, -1): 
+        temp2[i] += carry
+        if temp2[i] == 2:
+            temp2[i] = 0
+            carry = 1
+        else:
+            break
+    binary=""
+    for i in range(len(temp2)):
+         binary=binary+str(temp2[i])
+    return (int(binary))
+#R type
+if inputstr[25:32]=="0110011":
+  rd=register_encoding[inputstr[20:25]]
+  rs1=register_encoding[inputstr[12:17]]
+  rs2=register_encoding[inputstr[7:12]]
+  funct3=inputstr[17:20]
+  funct7=inputstr[0:7] 
+if(funct7 == "0000000"):
+    if(funct3=="000"):
+        register_values[rd]=(bintodecs(register_values[rs1]))+(bintodecs(register_values[rs2]))
+        register_values[rd]=two_compliment(register_values[rd])
+    if(funct3=="001"):
+        shift_by=int(bintodecs(register_values[rs2][-5:]))
+        register_values[rd]=register_values[rs1][shift_by:len(register_values[rs1])]
+        for i in range(len(register_values[rs1])-shift_by):
+            register_values[rd]=register_values[rd]+"0"
+    if(funct3=="010"):
+      if bintodecs(register_values[rs1])<bintodecs(register_values[rs2]):
+        register_values[rd]=two_compliment(1)
+    if(funct3=="011"):
+      if abs(bintodecs(register_values[rs1]))<abs(bintodecs(register_values[rs2])):
+        register_values[rd]=two_compliment(1)
+    if(funct3=="100"):
+      for i in range (len(register_values[rs1])):
+        if register_values[rs1][i]=="0" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"0"
+        elif register_values[rs1][i]=="0" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"1"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"1"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"0"
+    if(funct3=="101"):
+        shift_by=int(bintodecs(register_values[rs2][-5:]))
+        for i in range(shift_by):
+            register_values[rd]=register_values[rd]+"0"
+        register_values[rd]=register_values[rd]+register_values[rs1][:shift_by]
+      
+    if(funct3=="110"):
+      for i in range (len(register_values[rs1])):
+        if register_values[rs1][i]=="0" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"0"
+        elif register_values[rs1][i]=="0" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"1"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"1"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"1"
+    if(funct3=="111"):
+      for i in range (len(register_values[rs1])):
+        if register_values[rs1][i]=="0" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"0"
+        elif register_values[rs1][i]=="0" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"0"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="0":
+           register_values[rd]=register_values[rd]+"0"
+        elif register_values[rs1][i]=="1" and register_values[rs2][i]=="1":
+           register_values[rd]=register_values[rd]+"1"
+if(funct3 == "000" and funct7 == "0100000"):
+        if rs2=="x0":
+            register_values[rd]=0-bintodecs(register_values[rs2])
+            register_values[rd]=two_compliment(register_values[rd])
+        else:
+            register_values[rd]=(bintodecs(register_values[rs1]))-(bintodecs(register_values[rs2]))
+            register_values[rd]=two_compliment(register_values[rd])
