@@ -1,0 +1,21 @@
+if inputstr[25:32] == "0000011" or \
+ inputstr[25:32] == "0010011" or \
+ inputstr[25:32] == "0001011" or \
+ inputstr[25:32] == "1100111":
+  imm=inputstr[0:12]
+  rs1=register_encoding[inputstr[12:17]]
+  funct3=inputstr[17:20]
+  rd=register_encoding[inputstr[20:25]]
+  opcode=inputstr[25:32]
+  if(funct3=="000" and opcode=="0010011"):
+    #addi
+    print("addi")
+  if(funct3=="000" and opcode=="1100111"):
+    #jalr
+    print("jalr")
+  if(funct3=="010"):
+    #lw
+    print("lw")
+  if(funct3=="011"):
+    #sltiu
+    print("sltiu")
